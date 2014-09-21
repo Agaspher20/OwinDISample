@@ -19,6 +19,7 @@ app.UseWebApi(apiConfig);
 </source>
 
 О методе «ConfigureDependencyInjection» мы поговорим далее.
+
 <h4>Конфигурирование DI контейнера</h4>
 В данном примере я использую DI-контейнер Autofac, т.к. он уже располагает необходимыми реализациями классов DependencyResolver для WebApi и MVC, а также методами расширения для интеграции с OWIN.
 Установим необходимые модули:
@@ -57,6 +58,7 @@ private void ConfigureDependencyInjection(IAppBuilder app, HttpConfiguration api
 
 С этим кодом все очень просто. Сначала мы создаем ContainerBuilder и регистрируем в нём наши контроллеры, затем регистрируем сервисы. После этого создаем контейнер и устанавливаем его как DependencyResolver для WebApi и Mvc.
 Здесь необходимо обратить внимание на строчку app.UseAutofacMvc(); вызов этого метода позволяет расширить LifetimeScope объектов, чтобы они задействовались в MVC.
+
 <h4>Реализация компонента безопасности приложения на примере AspNet Identity</h4>
 <h5>Регистрирование компонентов</h5>
 В стандартном шаблоне приложения уже установлены пакеты AspNet Identity, однако если вы начали с пустого шаблона, то необходимо установить следующие пакеты
@@ -66,7 +68,7 @@ PM> Install-Package Microsoft.AspNet.Identity.Owin
 PM> Install-Package Microsoft.AspNet.Identity.EntityFramework
 </source>
 
-Для реализации безопасности AspNet Identity нам необходимо зарегистрировать всего четыре класса:
+Для реализации безопасности AspNet Identity нам необходимо зарегистрировать четыре класса:
 <ul>
 	<li>UserManager&lt;ApplicationUser&gt;</li>
         <li>SignInManager&lt;ApplicationUser, string&gt;</li>
@@ -100,9 +102,8 @@ var dataProtectionProvider = app.GetDataProtectionProvider();
 builder.Register<UserManager<ApplicationUser>>((c, p) => BuildUserManager(c, p, dataProtectionProvider));
 </source>
 
-<h4>Чистка приложения</h4>
+<h5>Бизнес логика</h5>
 Теперь можно использовать наш DI-контейнер для реализации логики приложения.
-<h5>AccountController и ManageController</h5>
 Если мы посмотрим в AccountController, то увидим там такие строки
 
 <source lang="cs">
@@ -111,7 +112,7 @@ HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
 HttpContext.GetOwinContext().Authentication;
 </source>
 
-С помощью которых разрешаются UserManager, SignInManager и IAuthenticationManager соответственно.
+С помощью этих строк разрешаются объекты классов UserManager, SignInManager и IAuthenticationManager соответственно.
 Такой подход предлагается библиотекой AspNet Identity. Он не подходит нам по нескольким причинам, самые очевидные из них:
 <ol>
 	<li>Использование ServiceLocator не позволяет нам контролировать зависимости внутри класса.</li>
@@ -136,3 +137,4 @@ Uninstall-Package Microsoft.AspNet.WebApi.WebHost
 
 <h4>Заключение</h4>
 В данной статье мы узнали как реализовать модульную структуру ASP.Net приложения с регистрацией компонентов в качестве OWIN Middleware, зарегистрировали единый Dependency Injection контейнер для ASP.Net MVC и WebApi и реализовали с его помощью модуль безопасности приложения.
+Полный код приложения доступен по <a href="https://github.com/Agaspher20/OwinDISample">ссылке на GitHub</a>.
